@@ -27,8 +27,8 @@ class Enterprise(models.Model):
 
     def save(self, *args, **kwargs):
         query = """
-        SELECT ?WDid ?countryLabel ?logo ?managerLabel ?imagen 
-        ?productLabel ?subsidiaryLabel ?haspartLabel ?createdLabel
+        SELECT ?WDid ?countryLabel ?logo ?imagen 
+        ?productLabel ?haspartLabel ?createdLabel
         WHERE {
             ?WDid wdt:P279* wd:"""+self.code+""" .
                    OPTIONAL{?WDid wdt:P17 ?country}.
