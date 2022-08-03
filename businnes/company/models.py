@@ -15,7 +15,7 @@ class Enterprise(models.Model):
     detail = models.CharField(max_length=500, verbose_name="Detalle",null=True,blank=True)
     product = models.CharField(max_length=5000, verbose_name="Productos",null=True,blank=True)
     haspart = models.CharField(max_length=5000, verbose_name="Parte de",null=True,blank=True)
-    created = models.CharField(max_length=5000, verbose_name="Fecha de creacion",null=True,blank=True)
+    created = models.DateTimeField(max_length=5000, verbose_name="Fecha de creacion",null=True,blank=True)
     json_original = models.TextField(max_length=500000, verbose_name="JSON original",null=True,blank=True)
 
     class Meta:
@@ -27,20 +27,20 @@ class Enterprise(models.Model):
 
     def save(self, *args, **kwargs):
         query = """
-        SELECT ?WDid ?countryLabel ?logo ?imagen 
-        ?productLabel ?haspartLabel ?createdLabel
+        SELECT ?WDid ?countryLabel ?logo ?managerLabel ?imagen 
+        ?productLabel ?subsidiaryLabel ?haspartLabel ?createdLabel
         WHERE {
             ?WDid wdt:P279* wd:"""+self.code+""" .
                    OPTIONAL{?WDid wdt:P17 ?country}.
                    OPTIONAL{?WDid wdt:P154 ?logo}.
                    OPTIONAL{?WDid wdt:P18 ?imagen}.
-                   OPTIONAL{?WDid wdt:P1056 ?product}.   
+                   OPTIONAL{?WDid wdt:P1056 ?product}.  
                    OPTIONAL{?WDid wdt:P361 ?haspart}.   
                    OPTIONAL{?WDid wdt:P571 ?created}.   
-        SERVICE wikibase:label { bd:serviceParam wikibase:language "en". }
+        SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],en". }
         }
         """
-        # obtiene todo el JSON
+        # obtienes todo el JSON
         res = return_sparql_query_results(query)
         data = res.get("results").get("bindings")
         product = list()
@@ -58,8 +58,9 @@ class Enterprise(models.Model):
                 print(e)
                 pass
         self.product = list(dict.fromkeys(product))
+        self.subsidiary = list(dict.fromkeys(subsidiary))
         self.haspart = list(dict.fromkeys(haspart))
-        # guardo la code de wikidata
+        # guardo la coude de wikidata
         try:
             self.country = res.get("results").get("bindings")[0].get("country").get("value")
         except Exception as e:
